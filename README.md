@@ -1,9 +1,20 @@
-# Fabric Example Mod
+# Bell Hack
+A Meteor addon created by Gnirlleb
 
-## Setup
+## Modules
+- Auto Griffer
+- Auto MapArt
+- AutoTNT
+- Auto Wither
+- Coord Logger
+- Glide
+- Lavacast Maker
+- New Chunks
+- Roof Travel
 
-For setup instructions please see the [fabric wiki page](https://fabricmc.net/wiki/tutorial:setup) that relates to the IDE that you are using.
-
-## License
-
-This template is available under the CC0 license. Feel free to learn from it and incorporate it in your own projects.
+## TODO
+### Auto map
+- should changing building pattern to be more efficent (not just one block type at a time)?
+- allow auto locking and clearing of map
+- issue where it goes to carpet location thinking its a chest location
+- migrate to not using meteor
