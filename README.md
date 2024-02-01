@@ -1,9 +1,18 @@
-# Fabric Example Mod
+# Auto Map Art
 
-## Setup
+## ABOUT
+Auto Map Art is a mod created by Wildbush that allows the automatic building of flat map arts or similar structures with the use of litematica, current only avaible as a meteor addon but later version will only require litematica
+## This mod does require litematica and meteor client
 
-For setup instructions please see the [fabric wiki page](https://fabricmc.net/wiki/tutorial:setup) that relates to the IDE that you are using.
+## HOW TO USE 
+1. First place a litematica schematic where ever youd like to build it
+2. Set locations in the module settings for where it should get materials from
+3. Enable the module and wait for it build your map
 
-## License
+## TODO
+- should changing building pattern to be more efficent (not just one block type at a time)?
+- allow auto locking and clearing of map
+- issue where it goes to carpet location thinking its a chest location
 
-This template is available under the CC0 license. Feel free to learn from it and incorporate it in your own projects.
+## Contact
+Discord : Wildbush
