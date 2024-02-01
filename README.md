@@ -2,7 +2,7 @@
 
 ## ABOUT
 Auto Map Art is a meteor addon created by Wildbush that allows the automatic building of flat map arts or similar structures with the use of litematica
-## <span style="color:red">This mod does require litematica and meteor client</span>
+## This mod does require litematica and meteor client
 
 ## HOW TO USE 
 1. First place a litematica schematic where ever youd like to build it
