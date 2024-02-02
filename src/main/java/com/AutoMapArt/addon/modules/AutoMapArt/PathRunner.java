@@ -40,14 +40,15 @@ public class PathRunner {
     }
 
     public boolean run() {
+        if (!active)
+            return false;
+
         timeoutCounter++;
         if (timeoutCounter == PATH_FOLLOWING_TIMEOUT) {
             generatePath();
             timeoutCounter = 0;
             return false;
         }
-        if (!active)
-            return false;
 
         AutoMapArtUtils.setPressed(mc.options.forwardKey, true);
         if (mc.player.getBlockPos().equals(path[current])) {
