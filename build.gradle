@@ -39,7 +39,7 @@ dependencies {
     modImplementation "curse.maven:litematica-${project.litematica_projectid}:${project.litematica_fileid}"
     //modImplementation "fi.dy.masa.malilib:malilib-fabric-${project.minecraft_version}:${project.malilib_version}"
     //modImplementation "curse.maven:litematica-308892:4946471"
-    modImplementation "curse.maven:malilib-303119:4788432"
+    modImplementation "curse.maven:malilib-${project.malilib_projectid}:${project.malilib_fileid}"
 }
 
 processResources {
