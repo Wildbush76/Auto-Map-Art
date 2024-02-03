@@ -18,6 +18,7 @@ public class AutoMapArt implements ModInitializer {
 	public static final Logger LOGGER = LoggerFactory.getLogger("auto-map-art");
 	public static AutoMapArt INSTANCE;
 	public static MinecraftClient mc;
+	public static ModSettings modSettings;
 
 	@Override
 	public void onInitialize() {
@@ -37,6 +38,7 @@ public class AutoMapArt implements ModInitializer {
 											return 1;
 										})))));
 
-		ModSettings modSettings = new ModSettings();
+		modSettings = new ModSettings();
+		modSettings.load();
 	}
 }

@@ -69,6 +69,13 @@ public class ModSettings {
         data.putLongArray("blockPositions", blockPositions);
         data.putIntArray("itemIds", itemIds);
 
+        try {
+            file.getParentFile().mkdirs();
+            NbtIo.write(data, file);
+
+        } catch (IOException IOE) {
+            System.out.println(IOE.getMessage());
+        }
     }
 
     private void setDefaultSettings() {
