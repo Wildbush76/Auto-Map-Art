@@ -14,9 +14,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class AutoMapArt implements ModInitializer {
-
 	public static final Logger LOGGER = LoggerFactory.getLogger("auto-map-art");
 	public static AutoMapArt INSTANCE;
+	// public static MinecraftClient mc;
 	public static MinecraftClient mc;
 	public static ModSettings modSettings;
 
