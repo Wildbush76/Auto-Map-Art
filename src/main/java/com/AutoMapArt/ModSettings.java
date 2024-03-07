@@ -15,8 +15,8 @@ import net.minecraft.util.math.BlockPos;
 public class ModSettings {
     public static final String MOD_ID = "auto-map-art";
     public static final File FOLDER = FabricLoader.getInstance().getGameDir().resolve(MOD_ID).toFile();
-    private static File file;
-    private static Map<Item, BlockPos> resourcePositions;
+    private File file;
+    private Map<Item, BlockPos> resourcePositions;
     private double interactRange;
     private int placeDelay;
     private int grabItemDelay;
@@ -48,8 +48,7 @@ public class ModSettings {
         grabItemDelay = data.getInt("grabItemDelay");
 
         int[] itemIds = data.getIntArray("itemIds");
-        long[] blockPositions = data.getLongArray("blockPositions");// TODO change this to allow mulitple locations for
-                                                                    // same type
+        long[] blockPositions = data.getLongArray("blockPositions");
 
         for (int i = 0; i < itemIds.length; i++) {
             resourcePositions.put(Item.byRawId(itemIds[i]), BlockPos.fromLong(blockPositions[i]));
