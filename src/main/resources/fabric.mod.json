@@ -8,20 +8,18 @@
 		"Wildbush"
 	],
 	"contact": {
-		"homepage": "https://fabricmc.net/",
-		"sources": "https://github.com/FabricMC/fabric-example-mod"
+		"homepage": "https://www.curseforge.com/minecraft/mc-mods/auto-map-art",
+		"sources": "https://github.com/Wildbush76/Auto-Map-Art"
 	},
-	"license": "CC0-1.0",
+	"license": "GNU LESSER GENERAL PUBLIC LICENSE",
 	"icon": "assets/modid/icon.png",
 	"environment": "*",
 	"entrypoints": {
 		"main": [
-			"com.AutoMapArt.AutoMapArt"
+			"com.automapart.AutoMapArt"
 		]
 	},
-	"mixins": [
-		
-	],
+	"mixins": [],
 	"depends": {
 		"fabricloader": ">=0.15.0",
 		"minecraft": "~1.20.2",

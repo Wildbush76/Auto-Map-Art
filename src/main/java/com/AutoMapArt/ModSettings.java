@@ -1,4 +1,4 @@
-package com.AutoMapArt;
+package com.automapart;
 
 import java.io.File;
 import java.io.IOException;
@@ -23,7 +23,6 @@ public class ModSettings {
 
     public ModSettings() {
         file = new File(FOLDER, MOD_ID + ".nbt");
-
     }
 
     public void load() {
@@ -34,12 +33,12 @@ public class ModSettings {
         NbtCompound data;
         try {
             data = NbtIo.read(file);
-        } catch (IOException IOE) {
-            System.out.println(IOE.getMessage());
+        } catch (IOException ioException) {
+            AutoMapArt.LOGGER.error(ioException.getMessage());
             setDefaultSettings();
             return;
-        } catch (CrashException CE) {
-            AutoMapArt.LOGGER.error("issues occured oh my gawd");
+        } catch (CrashException crashException) {
+            AutoMapArt.LOGGER.error("issues occured");
             setDefaultSettings();
             return;
         }
@@ -73,8 +72,8 @@ public class ModSettings {
             file.getParentFile().mkdirs();
             NbtIo.write(data, file);
 
-        } catch (IOException IOE) {
-            System.out.println(IOE.getMessage());
+        } catch (IOException ioException) {
+            AutoMapArt.LOGGER.error(ioException.getMessage());
         }
     }
 
@@ -82,7 +81,7 @@ public class ModSettings {
         placeDelay = 5;
         interactRange = 5;
         grabItemDelay = 1;
-        resourcePositions = new HashMap<Item, BlockPos>();
+        resourcePositions = new HashMap<>();
     }
 
     public double getInteractRange() {

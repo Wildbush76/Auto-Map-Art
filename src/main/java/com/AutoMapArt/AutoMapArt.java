@@ -1,4 +1,4 @@
-package com.AutoMapArt;
+package com.automapart;
 
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
@@ -16,15 +16,17 @@ import org.slf4j.LoggerFactory;
 public class AutoMapArt implements ModInitializer {
 	public static final Logger LOGGER = LoggerFactory.getLogger("auto-map-art");
 	public static AutoMapArt INSTANCE;
-	// public static MinecraftClient mc;
-	public static MinecraftClient mc;
-	public static ModSettings modSettings;
+	public static final MinecraftClient mc = MinecraftClient.getInstance();
+	public final ModSettings modSettings = new ModSettings();
+
+	private static void setInstance(AutoMapArt autoMapArt) {
+		INSTANCE = autoMapArt;
+	}
 
 	@Override
 	public void onInitialize() {
 		if (INSTANCE == null)
-			INSTANCE = this;
-		mc = MinecraftClient.getInstance();
+			setInstance(INSTANCE);
 
 		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess,
 				environment) -> dispatcher.register(literal("foo")
@@ -38,7 +40,6 @@ public class AutoMapArt implements ModInitializer {
 											return 1;
 										})))));
 
-		modSettings = new ModSettings();
 		modSettings.load();
 	}
 }
