@@ -1,6 +1,6 @@
 {
 	"schemaVersion": 1,
-	"id": "Auto-Map-Art",
+	"id": "auto-map-art",
 	"version": "${version}",
 	"name": "Auto Map Art",
 	"description": "it does stuff",
