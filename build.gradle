@@ -11,7 +11,6 @@ base {
 }
 
 repositories {
-	
     maven {url = "https://www.cursemaven.com"}
 }
 
@@ -31,6 +30,7 @@ dependencies {
 	minecraft("com.mojang:minecraft:${minecraft_version}")
     mappings("net.fabricmc:yarn:${yarn_mappings}:v2")
     modImplementation("net.fabricmc:fabric-loader:${loader_version}")
+	modImplementation "net.fabricmc.fabric-api:fabric-api:${fabric_version}"
     modImplementation("curse.maven:malilib-${malilib_projectid}:${malilib_fileid}")
     modImplementation("curse.maven:litematica-${litematica_projectid}:${litematica_fileid}")
 }
