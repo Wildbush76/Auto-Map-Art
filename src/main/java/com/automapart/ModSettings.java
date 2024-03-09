@@ -1,4 +1,4 @@
-package com.automapart;
+package com.AutoMapArt;
 
 import java.io.File;
 import java.io.IOException;
