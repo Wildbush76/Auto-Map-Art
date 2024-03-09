@@ -2,7 +2,7 @@ package com.automapart;
 
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
-//import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.command.argument.BlockPosArgumentType;
 import net.minecraft.command.argument.BlockPredicateArgumentType;
 import net.minecraft.text.Text;
@@ -16,7 +16,7 @@ import org.slf4j.LoggerFactory;
 public class AutoMapArt implements ModInitializer {
 	public static final Logger LOGGER = LoggerFactory.getLogger("auto-map-art");
 	private static AutoMapArt instance;
-	// public static final MinecraftClient mc = MinecraftClient.getInstance();
+	public static final MinecraftClient mc = MinecraftClient.getInstance();
 	public final ModSettings modSettings = new ModSettings();
 
 	public AutoMapArt() {

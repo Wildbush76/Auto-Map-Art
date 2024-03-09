@@ -29,6 +29,7 @@ public class ModSettings {
         if (file == null || !file.exists()) {
             setDefaultSettings();
             return;
+
         }
         NbtCompound data;
         try {
