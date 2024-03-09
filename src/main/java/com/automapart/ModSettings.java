@@ -49,11 +49,12 @@ public class ModSettings {
 
         int[] itemIds = data.getIntArray("itemIds");
         long[] blockPositions = data.getLongArray("blockPositions");
-
+        resourcePositions = new HashMap<>();
         for (int i = 0; i < itemIds.length; i++) {
             resourcePositions.put(Item.byRawId(itemIds[i]), BlockPos.fromLong(blockPositions[i]));
         }
 
+        AutoMapArt.LOGGER.info("Successfully loaded settings");
     }
 
     public void save() {
@@ -79,6 +80,7 @@ public class ModSettings {
     }
 
     private void setDefaultSettings() {
+        AutoMapArt.LOGGER.info("Loading default settings");
         placeDelay = 5;
         interactRange = 5;
         grabItemDelay = 1;

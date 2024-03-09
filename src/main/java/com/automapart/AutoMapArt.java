@@ -36,32 +36,37 @@ public class AutoMapArt implements ModInitializer {
 
 	@Override
 	public void onInitialize() {
+		LOGGER.info("Auto map art starting ");
 		CommandRegistrationCallback.EVENT.register((dispacher, registryAccess,
 				environment) -> dispacher.register(literal("testcommand")
 						.executes(context -> {
 							BlockPos position = modSettings.getResourcePosition(Items.TNT);
 							if (position != null) {
 								context.getSource().sendFeedback(() -> Text.literal(position.toShortString()), false);
+								return 1;
 							} else {
 								context.getSource().sendFeedback(() -> Text.literal("location not found"), false);
+								return 0;
 							}
-							return 1;
 						})));
+
 		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess,
 				environment) -> dispatcher.register(literal("foo")
 						.requires(source -> source.isExecutedByPlayer())
-						.then(argument("blockPosition", BlockPosArgumentType.blockPos()))
-						.then(argument("blockType", BlockStateArgumentType.blockState(registryAccess))
-								.executes(context -> {
-									BlockPos pos = BlockPosArgumentType.getBlockPos(context, "blockPosition");
-									BlockStateArgument blockType = BlockStateArgumentType.getBlockState(context,
-											"blockType");
-									modSettings.addResourcePosition(pos, blockType.getBlockState().getBlock().asItem());
-									context.getSource().sendFeedback(() -> Text.literal("Settings location"),
-											false);
+						.then(argument("blockPosition", BlockPosArgumentType.blockPos())
+								.then(argument("blockType",
+										BlockStateArgumentType.blockState(registryAccess))
+										.executes(context -> {
+											BlockPos pos = BlockPosArgumentType.getBlockPos(context, "blockPosition");
+											BlockStateArgument blockType = BlockStateArgumentType.getBlockState(context,
+													"blockType");
+											modSettings.addResourcePosition(pos,
+													blockType.getBlockState().getBlock().asItem());
+											context.getSource().sendFeedback(() -> Text.literal("Settings location"),
+													false);
 
-									return 1;
-								}))));
+											return 1;
+										})))));
 
 		modSettings.load();
 		Runtime.getRuntime().addShutdownHook(new Thread(
