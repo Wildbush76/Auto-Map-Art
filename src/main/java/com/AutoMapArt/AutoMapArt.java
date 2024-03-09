@@ -4,8 +4,11 @@ import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.command.argument.BlockPosArgumentType;
-import net.minecraft.command.argument.BlockPredicateArgumentType;
+import net.minecraft.command.argument.BlockStateArgument;
+import net.minecraft.command.argument.BlockStateArgumentType;
+import net.minecraft.item.Items;
 import net.minecraft.text.Text;
+import net.minecraft.util.math.BlockPos;
 
 import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
@@ -33,18 +36,35 @@ public class AutoMapArt implements ModInitializer {
 
 	@Override
 	public void onInitialize() {
+		CommandRegistrationCallback.EVENT.register((dispacher, registryAccess,
+				environment) -> dispacher.register(literal("testcommand")
+						.executes(context -> {
+							BlockPos position = modSettings.getResourcePosition(Items.TNT);
+							if (position != null) {
+								context.getSource().sendFeedback(() -> Text.literal(position.toShortString()), false);
+							} else {
+								context.getSource().sendFeedback(() -> Text.literal("location not found"), false);
+							}
+							return 1;
+						})));
 		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess,
 				environment) -> dispatcher.register(literal("foo")
 						.requires(source -> source.isExecutedByPlayer())
-						.then(argument("blockPosition", BlockPosArgumentType.blockPos())
-								.then(argument("blockType", BlockPredicateArgumentType.blockPredicate(registryAccess))
-										.executes(context -> {
-											context.getSource().sendFeedback(() -> Text.literal("Foo to you too"),
-													false);
+						.then(argument("blockPosition", BlockPosArgumentType.blockPos()))
+						.then(argument("blockType", BlockStateArgumentType.blockState(registryAccess))
+								.executes(context -> {
+									BlockPos pos = BlockPosArgumentType.getBlockPos(context, "blockPosition");
+									BlockStateArgument blockType = BlockStateArgumentType.getBlockState(context,
+											"blockType");
+									modSettings.addResourcePosition(pos, blockType.getBlockState().getBlock().asItem());
+									context.getSource().sendFeedback(() -> Text.literal("Settings location"),
+											false);
 
-											return 1;
-										})))));
+									return 1;
+								}))));
 
 		modSettings.load();
+		Runtime.getRuntime().addShutdownHook(new Thread(
+				modSettings::save));
 	}
 }

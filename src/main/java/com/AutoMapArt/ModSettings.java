@@ -29,7 +29,6 @@ public class ModSettings {
         if (file == null || !file.exists()) {
             setDefaultSettings();
             return;
-
         }
         NbtCompound data;
         try {
@@ -58,6 +57,7 @@ public class ModSettings {
     }
 
     public void save() {
+        AutoMapArt.LOGGER.info("Saving settings....");
         NbtCompound data = new NbtCompound();
         data.putInt("placeDelay", placeDelay);
         data.putInt("grabItemDelay", grabItemDelay);
@@ -71,6 +71,7 @@ public class ModSettings {
         try {
             file.getParentFile().mkdirs();
             NbtIo.write(data, file);
+            AutoMapArt.LOGGER.info("Sucessfully saved settings");
 
         } catch (IOException ioException) {
             AutoMapArt.LOGGER.error(ioException.getMessage());
@@ -98,5 +99,25 @@ public class ModSettings {
 
     public Map<Item, BlockPos> getResourcePositions() {
         return resourcePositions;
+    }
+
+    public BlockPos getResourcePosition(Item item) {
+        return resourcePositions.get(item);
+    }
+
+    public void addResourcePosition(BlockPos blockPos, Item item) {
+        resourcePositions.put(item, blockPos);
+    }
+
+    public void setPlaceDelay(int delay) {
+        placeDelay = delay;
+    }
+
+    public void setGrabItemDelay(int delay) {
+        grabItemDelay = delay;
+    }
+
+    public void setInteractRange(int range) {
+        interactRange = range;
     }
 }
