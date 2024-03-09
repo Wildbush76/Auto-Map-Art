@@ -1,4 +1,4 @@
-package com.AutoMapArt;
+package com.auto_map_art;
 
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
