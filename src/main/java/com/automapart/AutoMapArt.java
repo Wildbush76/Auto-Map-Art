@@ -6,12 +6,14 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.command.argument.BlockPosArgumentType;
 import net.minecraft.command.argument.BlockStateArgument;
 import net.minecraft.command.argument.BlockStateArgumentType;
-import net.minecraft.item.Items;
+import net.minecraft.item.Item;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 
 import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
+
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,17 +39,18 @@ public class AutoMapArt implements ModInitializer {
 	@Override
 	public void onInitialize() {
 		LOGGER.info("Auto map art starting ");
+
 		CommandRegistrationCallback.EVENT.register((dispacher, registryAccess,
 				environment) -> dispacher.register(literal("testcommand")
 						.executes(context -> {
-							BlockPos position = modSettings.getResourcePosition(Items.TNT);
-							if (position != null) {
-								context.getSource().sendFeedback(() -> Text.literal(position.toShortString()), false);
-								return 1;
-							} else {
-								context.getSource().sendFeedback(() -> Text.literal("location not found"), false);
-								return 0;
+							Map<Item, BlockPos> positions = modSettings.getResourcePositions();
+							context.getSource().sendFeedback(() -> Text.literal("Locations "), false);
+							for (Map.Entry<Item, BlockPos> item : positions.entrySet()) {
+								context.getSource().sendFeedback(() -> Text.literal(
+										item.getKey().getName().toString() + " at " + item.getValue().toShortString()),
+										false);
 							}
+							return 1;
 						})));
 
 		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess,

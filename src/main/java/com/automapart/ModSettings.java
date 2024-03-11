@@ -66,6 +66,14 @@ public class ModSettings {
 
         int[] itemIds = new int[resourcePositions.size()];
         long[] blockPositions = new long[resourcePositions.size()];
+
+        int i = 0;
+        for (Map.Entry<Item, BlockPos> entry : resourcePositions.entrySet()) {
+            itemIds[i] = Item.getRawId(entry.getKey());
+            blockPositions[i] = entry.getValue().asLong();
+            i++;
+        }
+
         data.putLongArray("blockPositions", blockPositions);
         data.putIntArray("itemIds", itemIds);
 
