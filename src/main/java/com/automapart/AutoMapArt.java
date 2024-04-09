@@ -22,6 +22,9 @@ public class AutoMapArt implements ModInitializer {
 	public static final Logger LOGGER = LoggerFactory.getLogger("auto-map-art");
 	private static AutoMapArt instance;
 	public static final MinecraftClient mc = MinecraftClient.getInstance();
+	public static boolean enabled = false;
+	public static boolean paused = true;
+
 	public final ModSettings modSettings = new ModSettings();
 
 	public AutoMapArt() {
