@@ -1,10 +1,18 @@
 package com.automapart.autobuilder;
 
 public class AutoBuilder {
-    private static final AutoBuilder INSTANCE = new AutoBuilder();
+    private static AutoBuilder instance = new AutoBuilder();
 
-    public AutoBuilder getInstance() {
-        return INSTANCE;
+    private static void setInstance() {
+        instance = new AutoBuilder();
+    }
+
+    public static AutoBuilder getInstance() {
+        if (instance == null) {
+            setInstance();
+
+        }
+        return instance;
     }
 
     private AutoBuilder() {
