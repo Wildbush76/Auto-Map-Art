@@ -20,22 +20,19 @@ import org.slf4j.LoggerFactory;
 
 public class AutoMapArt implements ModInitializer {
 	public static final Logger LOGGER = LoggerFactory.getLogger("auto-map-art");
-	private static AutoMapArt instance;
-	public static final MinecraftClient mc = MinecraftClient.getInstance();
-	public static boolean enabled = false;
-	public static boolean paused = true;
+	private static AutoMapArt instance = getInstance();
+	public final MinecraftClient mc = MinecraftClient.getInstance();
 
 	public final ModSettings modSettings = new ModSettings();
 
-	public AutoMapArt() {
-		setInstance(this);
-	}
+	private AutoMapArt() {
 
-	private static void setInstance(AutoMapArt autoMapArt) {
-		instance = autoMapArt;
 	}
 
 	public static AutoMapArt getInstance() {
+		if (instance == null) {
+			instance = new AutoMapArt();
+		}
 		return instance;
 	}
 
