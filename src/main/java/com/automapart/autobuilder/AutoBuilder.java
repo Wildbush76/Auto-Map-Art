@@ -5,6 +5,9 @@ import java.util.Map;
 
 import com.automapart.AutoMapArt;
 import com.automapart.ModSettings;
+import com.automapart.autobuilder.utils.Executer;
+import com.automapart.autobuilder.utils.InvUtils;
+import com.automapart.autobuilder.utils.Utils;
 
 import fi.dy.masa.litematica.data.DataManager;
 import fi.dy.masa.litematica.schematic.LitematicaSchematic;
@@ -15,36 +18,26 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.item.Item;
+import net.minecraft.network.packet.s2c.play.InventoryS2CPacket;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.Vec3i;
 
 public class AutoBuilder {
-    private Goal goal;
-    private static ModSettings settings = AutoMapArt.getInstance().modSettings;
-    private static AutoBuilder instance = new AutoBuilder();
-    private SchematicPlacement currentSchematic;
-    private stage currentStage;
-    private boolean blockPlaced;
-    private static final MinecraftClient mc = AutoMapArt.getInstance().mc;
-    private ArrayList<Block> completedBlockTypes = new ArrayList<>();
-    private ArrayList<BlockPos> currentBlocks = new ArrayList<>();
-    private Block currentBlockType;
-    private final int MAX_BLOCK_PLACE_ATTEMPTS = 10;
-
-    private int placeTimer;
-    private int currentFailedAttempts = 0;
-
     public enum stage {
         BUILDING,
         COLLECTING_MATERIALS, // travelling to collect
         DUMPING_WASTE, // travelling to dump
         WAITING
     }
+
+    private static ModSettings settings = AutoMapArt.getInstance().modSettings;
+    private static AutoBuilder instance = new AutoBuilder();
+    private static final MinecraftClient mc = AutoMapArt.getInstance().mc;
+    private static final int MAX_BLOCK_PLACE_ATTEMPTS = 10;
 
     public static AutoBuilder getInstance() {
         if (instance == null) {
@@ -57,6 +50,20 @@ public class AutoBuilder {
     private static void setInstance() {
         instance = new AutoBuilder();
     }
+
+    private Goal goal;
+    private SchematicPlacement currentSchematic;
+    private stage currentStage;
+    private boolean blockPlaced;
+
+    private ArrayList<Block> completedBlockTypes = new ArrayList<>();
+    private ArrayList<BlockPos> currentBlocks = new ArrayList<>();
+
+    private Block currentBlockType;
+
+    private int placeTimer;
+
+    private int currentFailedAttempts = 0;
 
     private boolean enabled = false;
 
@@ -73,6 +80,7 @@ public class AutoBuilder {
         switch (currentStage) {
             case BUILDING:
                 build();
+                endBuildTick();
                 break;
             case COLLECTING_MATERIALS:
             case DUMPING_WASTE:
@@ -83,26 +91,104 @@ public class AutoBuilder {
                 break;
 
         }
-
-        // more stuff here
     }
 
-    private void dumpWaste(ScreenHandler handler) { // basically the opposite of the thing below lol
+    public void onInventory(InventoryS2CPacket packet) {
+        if (paused || !enabled)
+            return;
+        ScreenHandler handler = mc.player.currentScreenHandler;
+        if (packet.getSyncId() != handler.syncId) {
+            return;
+        }
+        if (currentStage != stage.COLLECTING_MATERIALS && currentStage != stage.DUMPING_WASTE)
+            return;
+
+        switch (currentStage) {
+            case COLLECTING_MATERIALS:
+                Executer.execute(() -> getResources(handler));
+                break;
+            case DUMPING_WASTE:
+                Executer.execute(this::dumpWaste);
+                break;
+            default:
+                break;
+        }
+        currentStage = stage.WAITING;
+    }
+
+    public stage getCurrentStage() {
+        return currentStage;
+    }
+
+    public void pause() {
+        paused = true;
+    }
+
+    public void unpause() {
+        paused = false;
+    }
+
+    public void enable() {
+        enabled = true;
+        paused = false;
+
+        SchematicPlacementManager manager = DataManager.getSchematicPlacementManager();
+        SchematicPlacement closestPlacement = null;
+        Double distance = Double.MAX_VALUE;
+        for (SchematicPlacement schematicPlacement : manager.getAllSchematicsPlacements()) {
+            double dist = Utils.distanceTo(schematicPlacement.getOrigin());
+            if (dist < distance) {
+                distance = dist;
+                closestPlacement = schematicPlacement;
+            }
+        }
+        if (closestPlacement == null) {
+            Utils.error("No schematic loaded");
+            disable();
+            return;
+        }
+
+        currentSchematic = closestPlacement;
+        getNextBlocks();
+        currentStage = stage.BUILDING; // good as we dont need to dump waste of course
+        paused = false;
+        blockPlaced = false;
+    }
+
+    public void skipCurrentBlock() {
+        currentBlocks.clear();
+        getNextBlocks();
+    }
+
+    public void disable() {
+        currentSchematic = null;
+        currentBlockType = null;
+        currentBlocks.clear();
+        goal = null;
+        currentStage = stage.BUILDING;
+        completedBlockTypes.clear();
+        Utils.turnOffKeys();
+        enabled = false;
+        paused = false;
+    }
+
+    private void dumpWaste() { // basically the opposite of the thing below lol
         Item itemToFind = completedBlockTypes.get(completedBlockTypes.size() - 1).asItem();
 
-        Integer result = Utils.findItem(itemToFind);
+        Integer result = InvUtils.findItem(itemToFind);
 
         while (result != null) {
             try {
                 Thread.sleep(settings.getGrabItemDelay());
             } catch (InterruptedException e) {
                 e.printStackTrace();
+                Thread.currentThread().interrupt();
             }
             if (mc.currentScreen == null || !Utils.canUpdate())
                 break;
 
-            Utils.shiftClick(result);
-            result = Utils.findItem(itemToFind);
+            InvUtils.shiftClick(result);
+            result = InvUtils.findItem(itemToFind);
         }
         currentStage = stage.BUILDING;
         assignNextBlockGoal();
@@ -114,24 +200,23 @@ public class AutoBuilder {
         int stacksNeeded = (int) Math.ceil(currentBlocks.size() / 64d);
         int stacksGathered = 0;
         boolean gotResources = false;
-        for (int i = 0; i < SlotUtils.indexToId(SlotUtils.MAIN_START); i++) {
-            if (!handler.getSlot(i).hasStack()
-                    || !handler.getSlot(i).getStack().isOf(currentBlockType.asItem()))
-                continue;
-            if (Utils.findEmptySlot() == null)
-                break;
-            try {
-                Thread.sleep(settings.getGrabItemDelay());
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            if (mc.currentScreen == null || !Utils.canUpdate())
-                break;
-            Utils.shiftClick(i);
-            gotResources = true;
-            stacksGathered++;
-            if (stacksGathered == stacksNeeded) {
-                break;
+        for (int i = 0; i < InvUtils.indexToId(9); i++) {
+            if (handler.getSlot(i).hasStack()
+                    && handler.getSlot(i).getStack().isOf(currentBlockType.asItem())) {
+
+                try {
+                    Thread.sleep(settings.getGrabItemDelay());
+                } catch (InterruptedException e) {
+                    AutoMapArt.LOGGER.error("Interuppted Thread - ", e);
+                    Thread.currentThread().interrupt();
+                    return;
+                }
+                if (mc.currentScreen == null || !Utils.canUpdate() || InvUtils.findEmptySlot() == null
+                        || stacksGathered == stacksNeeded)
+                    break;
+                InvUtils.shiftClick(i);
+                gotResources = true;
+                stacksGathered++;
             }
         }
         if (!gotResources) {
@@ -144,55 +229,73 @@ public class AutoBuilder {
 
     }
 
-    private void build() {
-        if (placeTimer > 0) {
-            placeTimer--;
-            return;
+    private void endBuildTick() {
+        if (blockPlaced) {
+            BlockState state = mc.world.getBlockState(goal);
+            if (state.getBlock().equals(currentBlockType)) {
+                assignNextBlockGoal();
+            }
+            blockPlaced = false;
         }
+    }
 
+    private boolean checkIfShouldTravel() {
         if (goal == null || blockAlreadyThere(goal)) {
             assignNextBlockGoal();
-            return;
+            return false;
         } else if (mc.world.isChunkLoaded(goal.getX(), goal.getZ())) {
-            Integer findItemResult = Utils.findItem(currentBlockType.asItem());
+            Integer findItemResult = InvUtils.findItem(currentBlockType.asItem());
 
             if (findItemResult == null) {
                 currentBlocks.add(0, goal);
                 setCollectMaterials();
                 Utils.debug("out of " + currentBlockType.asItem().getName().getString());
-                return;
+                return false;
             }
 
         }
-        if (goal.travelTo() && placeTimer == 0) {
-            BlockState targetedBlock = mc.world.getBlockState(goal);
-            if (!targetedBlock.isReplaceable() && !targetedBlock.getBlock().equals(currentBlockType)) {
-                BlockUtils.breakBlock(goal, true);
-                return;
-            }
-            FindItemResult findItemResult = InvUtils.find(currentBlockType.asItem());
-            if (!findItemResult.isHotbar() && findItemResult.found()) {
-                InvUtils.move().fromMain(findItemResult.slot() - 9).toHotbar(1);
-            }
-            if (settings.getRotateToPlace())
-                Utils.lookTowardBlock(mc, goal, true);
-            boolean result = BlockUtils.place(goal, findItemResult, settings.getRotateToPlace(), 100,
-                    true, true,
-                    false);
-            if (!result) {
-                currentFailedAttempts++;
-                if (currentFailedAttempts == MAX_BLOCK_PLACE_ATTEMPTS) {
-                    currentFailedAttempts = 0; // lol
-                    currentBlocks.add(goal); // to try again later ig lol
-                    assignNextBlockGoal();
-                }
-            } else {
-                currentFailedAttempts = 0;
-                // assignNextBlockGoal();
-                blockPlaced = true;
-            }
-            placeTimer = settings.getPlaceDelay();
+        return true;
+    }
+
+    private void build() {
+        if (placeTimer > 0) {
+            placeTimer--;
+            return;
         }
+        if (!checkIfShouldTravel()) {
+            return;
+        }
+        if (goal.travelTo() && placeTimer == 0) {
+            tryToPlaceBlock();
+        }
+    }
+
+    private void tryToPlaceBlock() {
+        BlockState targetedBlock = mc.world.getBlockState(goal);
+        if (!targetedBlock.isReplaceable() && !targetedBlock.getBlock().equals(currentBlockType)) {
+            Utils.breakBlock(goal);
+            return;
+        }
+
+        Integer result = InvUtils.findItem(currentBlockType.asItem());
+        if (result != null && !InvUtils.isMain(result)) {
+            InvUtils.moveToHand(result);
+        }
+        if (settings.getRotateToPlace())
+            Utils.lookTowardBlock(goal, true);
+        boolean placeResult = Utils.placeBlock(goal, settings.getRotateToPlace(), currentBlockType);
+        if (!placeResult) {
+            currentFailedAttempts++;
+            if (currentFailedAttempts == MAX_BLOCK_PLACE_ATTEMPTS) {
+                currentFailedAttempts = 0; // lol
+                currentBlocks.add(goal); // to try again later ig lol
+                assignNextBlockGoal();
+            }
+        } else {
+            currentFailedAttempts = 0;
+            blockPlaced = true;
+        }
+        placeTimer = settings.getPlaceDelay();
     }
 
     private void setCollectMaterials() {
@@ -254,68 +357,6 @@ public class AutoBuilder {
         }
     }
 
-    public void onInventory(InventoryEvent event) {
-        if (paused)
-            return;
-        ScreenHandler handler = mc.player.currentScreenHandler;
-        if (event.packet.getSyncId() != handler.syncId) {
-            return;
-        }
-        if (currentStage != stage.COLLECTING_MATERIALS && currentStage != stage.DUMPING_WASTE)
-            return;
-
-        switch (currentStage) {
-            case COLLECTING_MATERIALS: // dude lol
-                MeteorExecutor.execute(() -> getResources(handler));
-                break;
-            case DUMPING_WASTE:
-                MeteorExecutor.execute(() -> dumpWaste(handler));
-                break;
-            default:
-                break;
-        }
-        currentStage = stage.WAITING;
-    }
-
-    public stage getCurrentStage() {
-        return currentStage;
-    }
-
-    public void pause() {
-        paused = true;
-    }
-
-    public void unpause() {
-        paused = false;
-    }
-
-    public void enable() {
-        enabled = true;
-        paused = false;
-
-        SchematicPlacementManager manager = DataManager.getSchematicPlacementManager();
-        SchematicPlacement closestPlacement = null;
-        Double distance = Double.MAX_VALUE;
-        for (SchematicPlacement schematicPlacement : manager.getAllSchematicsPlacements()) {
-            double dist = Utils.distanceTo(schematicPlacement.getOrigin());
-            if (dist < distance) {
-                distance = dist;
-                closestPlacement = schematicPlacement;
-            }
-        }
-        if (closestPlacement == null) {
-            Utils.error("No schematic loaded");
-            disable();
-            return;
-        }
-
-        currentSchematic = closestPlacement;
-        getNextBlocks();
-        currentStage = stage.BUILDING; // good as we dont need to dump waste of course
-        paused = false;
-        blockPlaced = false;
-    }
-
     private boolean blockAlreadyThere(Vec3i goal) {
         return !mc.world.isChunkLoaded(goal.getX(), goal.getZ())
                 || mc.world.getBlockState(new BlockPos(goal)).getBlock().equals(currentBlockType);
@@ -331,7 +372,7 @@ public class AutoBuilder {
         if (currentBlockType != null) {
             Utils.debug("Completed " + currentBlockType.asItem().getName().getString());
             completedBlockTypes.add(currentBlockType);
-            Integer result = Utils.findItem(currentBlockType.asItem());
+            Integer result = InvUtils.findItem(currentBlockType.asItem());
             if (result == null) {
                 setDumpWasteGoal();
             }
@@ -369,11 +410,6 @@ public class AutoBuilder {
         }
     }
 
-    public void skipCurrentBlock() {
-        currentBlocks.clear();
-        getNextBlocks();
-    }
-
     private void checkAndAddBlock(BlockState blockState, BlockPos blockPosition) {
         if (shouldBePlaced(blockState)) {
             return;
@@ -407,17 +443,5 @@ public class AutoBuilder {
 
     private boolean isCompletedBlockType(Block block) {
         return completedBlockTypes.contains(block);
-    }
-
-    public void disable() {
-        currentSchematic = null;
-        currentBlockType = null;
-        currentBlocks.clear();
-        goal = null;
-        currentStage = stage.BUILDING;
-        completedBlockTypes.clear();
-        Utils.turnOffKeys();
-        enabled = false;
-        paused = false;
     }
 }

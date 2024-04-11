@@ -1,10 +1,12 @@
 package com.automapart.autobuilder;
 
+import com.automapart.autobuilder.utils.Utils;
+
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.util.math.BlockPos;
 
 public class PathRunner {
-    private final int PATH_FOLLOWING_TIMEOUT = 200;// 200 ticks before stop trying to go to next node
+    private static final int PATH_FOLLOWING_TIMEOUT = 200;// 200 ticks before stop trying to go to next node
 
     private MinecraftClient mc;
     private BlockPos[] path;
@@ -58,12 +60,9 @@ public class PathRunner {
                 return checkDone();
             }
         }
-        if (path[current].getY() - mc.player.getBlockPos().getY() > 0) {
-            Utils.setPressed(mc.options.jumpKey, true);
-        } else {
-            Utils.setPressed(mc.options.jumpKey, false);
-        }
-        Utils.lookTowardBlock(mc, path[current]);
+
+        Utils.setPressed(mc.options.jumpKey, path[current].getY() - mc.player.getBlockPos().getY() > 0);
+        Utils.lookTowardBlock(path[current]);
         return false;
     }
 

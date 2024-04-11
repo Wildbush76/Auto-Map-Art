@@ -8,6 +8,7 @@ import java.util.Objects;
 import java.util.Set;
 
 import com.automapart.AutoMapArt;
+import com.automapart.autobuilder.utils.Utils;
 
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.util.math.BlockPos;

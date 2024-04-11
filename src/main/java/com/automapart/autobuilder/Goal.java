@@ -3,6 +3,7 @@ package com.automapart.autobuilder;
 import com.automapart.AutoMapArt;
 import com.automapart.ModSettings;
 import com.automapart.autobuilder.AutoBuilder.stage;
+import com.automapart.autobuilder.utils.Utils;
 
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.util.math.BlockPos;
@@ -33,11 +34,11 @@ public class Goal extends BlockPos {
     public boolean travelTo() {
         double distance = Utils.distanceTo(this);
 
-        if (distance < settings.getInteractRange()) {
-            if (AutoBuilder.getInstance().getCurrentStage() != stage.BUILDING || distance > 1) {
-                Utils.turnOffKeys();
-                return true;
-            }
+        if (distance < settings.getInteractRange()
+                && (AutoBuilder.getInstance().getCurrentStage() != stage.BUILDING || distance > 1)) {
+            Utils.turnOffKeys();
+            return true;
+
         }
         if (runner.active) {
             return runner.run();
