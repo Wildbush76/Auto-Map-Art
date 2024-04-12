@@ -13,7 +13,7 @@ public class PathRunner {
     private BlockPos goal;
     private Astar astar;
     private int timeoutCounter = 0;
-    public boolean active = true;
+    private boolean active = true;
 
     private int current = 0;
 
@@ -29,12 +29,12 @@ public class PathRunner {
     }
 
     private BlockPos[] generatePath() {
-        BlockPos[] path = astar.findPath(mc.player.getBlockPos(), goal);
-        if (path == null) {
+        BlockPos[] generatedPath = astar.findPath(mc.player.getBlockPos(), goal);
+        if (generatedPath == null) {
             active = false;
         }
         current = 0;
-        return path;
+        return generatedPath;
     }
 
     public boolean isActive() {

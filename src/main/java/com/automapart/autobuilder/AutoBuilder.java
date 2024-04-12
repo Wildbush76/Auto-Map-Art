@@ -6,7 +6,7 @@ import java.util.Map;
 import com.automapart.AutoMapArt;
 import com.automapart.ModSettings;
 import com.automapart.autobuilder.utils.Executer;
-import com.automapart.autobuilder.utils.InvUtils;
+import com.automapart.autobuilder.utils.ItemUtils;
 import com.automapart.autobuilder.utils.Utils;
 
 import fi.dy.masa.litematica.data.DataManager;
@@ -175,7 +175,7 @@ public class AutoBuilder {
     private void dumpWaste() { // basically the opposite of the thing below lol
         Item itemToFind = completedBlockTypes.get(completedBlockTypes.size() - 1).asItem();
 
-        Integer result = InvUtils.findItem(itemToFind);
+        Integer result = ItemUtils.findItem(itemToFind);
 
         while (result != null) {
             try {
@@ -187,8 +187,8 @@ public class AutoBuilder {
             if (mc.currentScreen == null || !Utils.canUpdate())
                 break;
 
-            InvUtils.shiftClick(result);
-            result = InvUtils.findItem(itemToFind);
+            ItemUtils.shiftClick(result);
+            result = ItemUtils.findItem(itemToFind);
         }
         currentStage = stage.BUILDING;
         assignNextBlockGoal();
@@ -200,7 +200,7 @@ public class AutoBuilder {
         int stacksNeeded = (int) Math.ceil(currentBlocks.size() / 64d);
         int stacksGathered = 0;
         boolean gotResources = false;
-        for (int i = 0; i < InvUtils.indexToId(9); i++) {
+        for (int i = 0; i < ItemUtils.indexToId(9); i++) {
             if (handler.getSlot(i).hasStack()
                     && handler.getSlot(i).getStack().isOf(currentBlockType.asItem())) {
 
@@ -211,10 +211,10 @@ public class AutoBuilder {
                     Thread.currentThread().interrupt();
                     return;
                 }
-                if (mc.currentScreen == null || !Utils.canUpdate() || InvUtils.findEmptySlot() == null
+                if (mc.currentScreen == null || !Utils.canUpdate() || ItemUtils.findEmptySlot() == null
                         || stacksGathered == stacksNeeded)
                     break;
-                InvUtils.shiftClick(i);
+                ItemUtils.shiftClick(i);
                 gotResources = true;
                 stacksGathered++;
             }
@@ -244,7 +244,7 @@ public class AutoBuilder {
             assignNextBlockGoal();
             return false;
         } else if (mc.world.isChunkLoaded(goal.getX(), goal.getZ())) {
-            Integer findItemResult = InvUtils.findItem(currentBlockType.asItem());
+            Integer findItemResult = ItemUtils.findItem(currentBlockType.asItem());
 
             if (findItemResult == null) {
                 currentBlocks.add(0, goal);
@@ -277,9 +277,9 @@ public class AutoBuilder {
             return;
         }
 
-        Integer result = InvUtils.findItem(currentBlockType.asItem());
-        if (result != null && !InvUtils.isMain(result)) {
-            InvUtils.moveToHand(result);
+        Integer result = ItemUtils.findItem(currentBlockType.asItem());
+        if (result != null && !ItemUtils.isMain(result)) {
+            ItemUtils.moveToHand(result);
         }
         if (settings.getRotateToPlace())
             Utils.lookTowardBlock(goal, true);
@@ -372,7 +372,7 @@ public class AutoBuilder {
         if (currentBlockType != null) {
             Utils.debug("Completed " + currentBlockType.asItem().getName().getString());
             completedBlockTypes.add(currentBlockType);
-            Integer result = InvUtils.findItem(currentBlockType.asItem());
+            Integer result = ItemUtils.findItem(currentBlockType.asItem());
             if (result == null) {
                 setDumpWasteGoal();
             }

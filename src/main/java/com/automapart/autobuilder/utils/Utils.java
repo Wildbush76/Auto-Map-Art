@@ -92,7 +92,6 @@ public class Utils {
 
     public static void setPressed(KeyBinding key, boolean pressed) {
         key.setPressed(pressed);
-        // Input.setKeyState(key, pressed);
     }
 
     public static boolean canUpdate() {

@@ -40,7 +40,7 @@ public class Goal extends BlockPos {
             return true;
 
         }
-        if (runner.active) {
+        if (runner.isActive()) {
             return runner.run();
         } else {
             Utils.info("Error while pathfinding");
@@ -50,7 +50,7 @@ public class Goal extends BlockPos {
     }
 
     public BlockPos[] getPath() {
-        if (runner.active) {
+        if (runner.isActive()) {
             return runner.getPath();
         }
         return null;
