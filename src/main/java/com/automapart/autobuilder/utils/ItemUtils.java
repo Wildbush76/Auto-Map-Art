@@ -7,7 +7,7 @@ import net.minecraft.item.Item;
 import net.minecraft.screen.*;
 import net.minecraft.screen.slot.SlotActionType;
 
-public class InvUtils {
+public class ItemUtils {
     private static final MinecraftClient mc = AutoMapArt.getInstance().mc;
     public static final int HOTBAR_START_SLOT = 0;
     public static final int HOTBAR_END_SLOT = 8;
@@ -15,7 +15,7 @@ public class InvUtils {
     public static final int MAIN_START_SLOT = 9;
     public static final int MAIN_END_SLOT = 35;
 
-    private InvUtils() {
+    private ItemUtils() {
 
     }
 

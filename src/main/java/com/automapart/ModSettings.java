@@ -16,8 +16,8 @@ import net.minecraft.util.crash.CrashException;
 import net.minecraft.util.math.BlockPos;
 
 public class ModSettings {
-    public static final String MOD_ID = "auto-map-art";
-    public static final File FOLDER = FabricLoader.getInstance().getGameDir().resolve(MOD_ID).toFile();
+
+    public static final File FOLDER = FabricLoader.getInstance().getGameDir().resolve(AutoMapArt.MOD_ID).toFile();
     private File file;
     private Map<Item, BlockPos> resourcePositions;
     private double interactRange;
@@ -28,7 +28,7 @@ public class ModSettings {
     private boolean rotateToPlace;
 
     public ModSettings() {
-        file = new File(FOLDER, MOD_ID + ".nbt");
+        file = new File(FOLDER, AutoMapArt.MOD_ID + ".nbt");
     }
 
     public void load() {
@@ -59,23 +59,6 @@ public class ModSettings {
         AutoMapArt.LOGGER.info("Successfully loaded settings");
     }
 
-    private void loadBlackList(NbtCompound data) {
-        int[] blockIds = data.getIntArray("blackList");
-        blackList = new ArrayList<>(blockIds.length);
-        for (int id : blockIds) {
-            blackList.add(Block.getBlockFromItem(Item.byRawId(id)));
-        }
-    }
-
-    private void loadBlockPositions(NbtCompound data) {
-        int[] itemIds = data.getIntArray("itemIds");
-        long[] blockPositions = data.getLongArray("blockPositions");
-        resourcePositions = new HashMap<>();
-        for (int i = 0; i < itemIds.length; i++) {
-            resourcePositions.put(Item.byRawId(itemIds[i]), BlockPos.fromLong(blockPositions[i]));
-        }
-    }
-
     public void save() {
         AutoMapArt.LOGGER.info("Saving settings....");
         NbtCompound data = new NbtCompound();
@@ -96,40 +79,6 @@ public class ModSettings {
         } catch (IOException ioException) {
             AutoMapArt.LOGGER.error(ioException.getMessage());
         }
-    }
-
-    private void saveBlockPositions(NbtCompound data) {
-        int[] itemIds = new int[resourcePositions.size()];
-        long[] blockPositions = new long[resourcePositions.size()];
-
-        int i = 0;
-        for (Map.Entry<Item, BlockPos> entry : resourcePositions.entrySet()) {
-            itemIds[i] = Item.getRawId(entry.getKey());
-            blockPositions[i] = entry.getValue().asLong();
-            i++;
-        }
-
-        data.putLongArray("blockPositions", blockPositions);
-        data.putIntArray("itemIds", itemIds);
-
-    }
-
-    private void saveBlackList(NbtCompound data) {
-        int[] blackListIds = new int[blackList.size()];
-        for (int i = 0; i < blackListIds.length; i++) {
-            blackListIds[i] = Item.getRawId(blackList.get(i).asItem());
-        }
-        data.putIntArray("blackList", blackListIds);
-    }
-
-    private void setDefaultSettings() {
-        AutoMapArt.LOGGER.info("Loading default settings");
-        placeDelay = 3;
-        interactRange = 5;
-        grabItemDelay = 1;
-        resourcePositions = new HashMap<>();
-        blackList = new ArrayList<>();
-        rotateToPlace = true;
     }
 
     public double getInteractRange() {
@@ -178,5 +127,56 @@ public class ModSettings {
 
     public BlockPos getWasteLocation() {
         return wasteLocation;
+    }
+
+    private void loadBlackList(NbtCompound data) {
+        int[] blockIds = data.getIntArray("blackList");
+        blackList = new ArrayList<>(blockIds.length);
+        for (int id : blockIds) {
+            blackList.add(Block.getBlockFromItem(Item.byRawId(id)));
+        }
+    }
+
+    private void loadBlockPositions(NbtCompound data) {
+        int[] itemIds = data.getIntArray("itemIds");
+        long[] blockPositions = data.getLongArray("blockPositions");
+        resourcePositions = new HashMap<>();
+        for (int i = 0; i < itemIds.length; i++) {
+            resourcePositions.put(Item.byRawId(itemIds[i]), BlockPos.fromLong(blockPositions[i]));
+        }
+    }
+
+    private void saveBlockPositions(NbtCompound data) {
+        int[] itemIds = new int[resourcePositions.size()];
+        long[] blockPositions = new long[resourcePositions.size()];
+
+        int i = 0;
+        for (Map.Entry<Item, BlockPos> entry : resourcePositions.entrySet()) {
+            itemIds[i] = Item.getRawId(entry.getKey());
+            blockPositions[i] = entry.getValue().asLong();
+            i++;
+        }
+
+        data.putLongArray("blockPositions", blockPositions);
+        data.putIntArray("itemIds", itemIds);
+
+    }
+
+    private void saveBlackList(NbtCompound data) {
+        int[] blackListIds = new int[blackList.size()];
+        for (int i = 0; i < blackListIds.length; i++) {
+            blackListIds[i] = Item.getRawId(blackList.get(i).asItem());
+        }
+        data.putIntArray("blackList", blackListIds);
+    }
+
+    private void setDefaultSettings() {
+        AutoMapArt.LOGGER.info("Loading default settings");
+        placeDelay = 3;
+        interactRange = 5;
+        grabItemDelay = 1;
+        resourcePositions = new HashMap<>();
+        blackList = new ArrayList<>();
+        rotateToPlace = true;
     }
 }
