@@ -12,7 +12,7 @@
 		"sources": "https://github.com/Wildbush76/Auto-Map-Art"
 	},
 	"license": "GNU LESSER GENERAL PUBLIC LICENSE",
-	"icon": "assets/modid/icon.png",
+	"icon": "assets/auto-map-art/icon.png",
 	"environment": "client",
 	"entrypoints": {
 		"main": [
@@ -20,7 +20,7 @@
 		]
 	},
 	"mixins": [
-		"auto-map-art.mixins.json"
+		"assets/auto-map-art.mixins.json"
 	],
 	"depends": {
 		"fabricloader": ">=0.15.0",
