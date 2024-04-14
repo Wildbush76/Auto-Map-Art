@@ -1,19 +1,21 @@
 package com.automapart.autobuilder.utils;
 
-import com.automapart.AutoMapArt;
-
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.item.Item;
 import net.minecraft.screen.*;
 import net.minecraft.screen.slot.SlotActionType;
 
 public class ItemUtils {
-    private static final MinecraftClient mc = AutoMapArt.getInstance().mc;
+    private static MinecraftClient mc;
     public static final int HOTBAR_START_SLOT = 0;
     public static final int HOTBAR_END_SLOT = 8;
 
     public static final int MAIN_START_SLOT = 9;
     public static final int MAIN_END_SLOT = 35;
+
+    public static void initialize(MinecraftClient mc) {
+        ItemUtils.mc = mc;
+    }
 
     private ItemUtils() {
 

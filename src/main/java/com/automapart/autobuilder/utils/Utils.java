@@ -1,7 +1,5 @@
 package com.automapart.autobuilder.utils;
 
-import com.automapart.AutoMapArt;
-
 import net.minecraft.block.*;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -19,7 +17,11 @@ import net.minecraft.util.math.Vec3i;
 import net.minecraft.world.World;
 
 public class Utils {
-    private static final MinecraftClient mc = AutoMapArt.getInstance().mc;
+    public static void initialize(MinecraftClient mc) {
+        Utils.mc = mc;
+    }
+
+    private static MinecraftClient mc;
 
     public static void turnOffKeys() {
         setPressed(mc.options.forwardKey, false);

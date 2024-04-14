@@ -36,13 +36,16 @@ public class AutoBuilder {
 
     private static ModSettings settings = AutoMapArt.getInstance().modSettings;
     private static AutoBuilder instance = new AutoBuilder();
-    private static final MinecraftClient mc = AutoMapArt.getInstance().mc;
+    private MinecraftClient mc;
     private static final int MAX_BLOCK_PLACE_ATTEMPTS = 10;
+
+    public void initialize(MinecraftClient mc) {
+        this.mc = mc;
+    }
 
     public static AutoBuilder getInstance() {
         if (instance == null) {
             setInstance();
-
         }
         return instance;
     }
@@ -151,7 +154,6 @@ public class AutoBuilder {
         currentSchematic = closestPlacement;
         getNextBlocks();
         currentStage = stage.BUILDING; // good as we dont need to dump waste of course
-        paused = false;
         blockPlaced = false;
     }
 
@@ -308,7 +310,7 @@ public class AutoBuilder {
         }
 
         BlockPos chestLocation = materialPositions.get(currentBlockType.asItem());
-        goal = new Goal(chestLocation);
+        goal = new Goal(mc, chestLocation);
         currentStage = stage.COLLECTING_MATERIALS;
     }
 
@@ -349,7 +351,7 @@ public class AutoBuilder {
             if (currentBlocks.isEmpty()) {
                 BlockPos nextGoal = currentBlocks.remove(0);
                 if (!blockAlreadyThere(nextGoal)) {
-                    goal = new Goal(nextGoal);
+                    goal = new Goal(mc, nextGoal);
                     assignedBlock = true;
                 }
 
@@ -428,7 +430,7 @@ public class AutoBuilder {
     }
 
     private void setDumpWasteGoal() {
-        goal = new Goal(settings.getWasteLocation());
+        goal = new Goal(mc, settings.getWasteLocation());
         currentStage = stage.DUMPING_WASTE;
     }
 

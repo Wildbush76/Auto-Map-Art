@@ -10,17 +10,17 @@ import net.minecraft.util.math.BlockPos;
 
 public class Goal extends BlockPos {
     private PathRunner runner;
-    private static MinecraftClient mc = AutoMapArt.getInstance().mc;
     private static ModSettings settings = AutoMapArt.getInstance().modSettings;
 
-    public Goal(BlockPos blockPos) {
+    public Goal(MinecraftClient mc, BlockPos blockPos) {
         super(blockPos);
         double distance = Utils.distanceTo(this);
         if (distance < 1) {
             BlockPos alternateGoal = searchForPlacementLocation();
             if (alternateGoal != null) {
                 runner = new PathRunner(mc, alternateGoal);
-                AutoMapArt.LOGGER.debug("doing an alternate goal " + alternateGoal.toString());
+
+                AutoMapArt.LOGGER.debug("doing an alternate goal");
                 return;
             } else {
                 Utils.info("Pathing failed");
@@ -53,7 +53,7 @@ public class Goal extends BlockPos {
         if (runner.isActive()) {
             return runner.getPath();
         }
-        return null;
+        return new BlockPos[0];
     }
 
     private BlockPos searchForPlacementLocation() {

@@ -12,10 +12,11 @@ import com.automapart.autobuilder.utils.Utils;
 
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3i;
 
 public class Astar {
-    private final int maxLength = 200;
-    private final int timeout = 5000;
+    private static final int MAX_LENGTH = 200;
+    private static final int TIMEOUT = 5000;
     private MinecraftClient mc;
 
     public Astar(MinecraftClient mc) {
@@ -42,8 +43,8 @@ public class Astar {
         while (!openSet.isEmpty()) {
             movementsConsidered++;
             if (checkTime == 0) {
-                if (System.currentTimeMillis() - startTime >= timeout) {
-                    return null;
+                if (System.currentTimeMillis() - startTime >= TIMEOUT) {
+                    return new BlockPos[0];
                 }
                 checkTime = 1000;
             } else {
@@ -56,7 +57,7 @@ public class Astar {
             closedSet.add(current);
 
             List<Node> neighbors = getNeighbors(mc, current, goal);
-            if (current.gScore >= maxLength || neighbors == null) {
+            if (current.gScore >= MAX_LENGTH || neighbors.isEmpty()) {
                 AutoMapArt.LOGGER.debug("Movements Considered " + movementsConsidered + " Time taken "
                         + (System.currentTimeMillis() - startTime));
                 return createPath(current);
@@ -81,11 +82,11 @@ public class Astar {
             }
         }
 
-        return null;
+        return new BlockPos[0];
     }
 
     private BlockPos[] createPath(Node node) {
-        ArrayList<BlockPos> blockPos = new ArrayList<BlockPos>();
+        ArrayList<BlockPos> blockPos = new ArrayList<>();
         Node currentPlace = node;
         while (currentPlace != null) {
             blockPos.add(new BlockPos(currentPlace.x, currentPlace.y, currentPlace.z));
@@ -100,44 +101,30 @@ public class Astar {
     }
 
     private double heuristic(Node one, Node two) {
-        return Math.sqrt(Math.pow(one.x - two.x, 2) + Math.pow(one.y - two.y, 2) + Math.pow(one.z - two.z, 2));
+        return Math.sqrt(Math.pow((double) one.x - two.x, 2) + Math.pow((double) one.y - two.y, 2)
+                + Math.pow((double) one.z - two.z, 2));
     }
 
     private Node getLowestCostNode(Set<Node> openSet) {
-        return openSet.stream().min(Comparator.comparingDouble(node -> node.fScore)).orElse(null);
+        return openSet.stream().min(Comparator.comparingDouble(node -> node.fScore)).orElse(new Node(0, 0, 0));
     }
 
     private List<Node> getNeighbors(MinecraftClient mc, Node node, BlockPos goal) {
         List<Node> neighbors = new ArrayList<>();
 
-        for (int dx = -1; dx <= 1; dx++) {
-            for (int dz = -1; dz <= 1; dz++) {
+        for (int dx = -1; dx <= 1; dx += 2) {
+            for (int dz = -1; dz <= 1; dz += 2) {
                 if (!mc.world.isChunkLoaded(node.x + dx, node.z + dz)) {
-                    return null;
+                    return new ArrayList<>(0);
                 }
-                for (int dy = -1; dy <= 1; dy++) {
-                    if (dx == 0 && dy == 0 && dz == 0) {
-                        continue; // Skip the current node
-                    }
-                    int newX = node.x + dx;
-                    int newY = node.y + dy;
-                    int newZ = node.z + dz;
-                    if (goal.getX() == newX && goal.getY() == newY && goal.getZ() == newZ) {
-                        return null;
-                    }
-                    if (!Utils.canWalk(newX, newY, newZ)) {
-                        continue;
+                for (int dy = -1; dy <= 1; dy += 2) {
+                    BlockPos pos = new BlockPos(node.x + dx, node.y + dy, node.z + dz);
+                    if (goal.equals(pos)) {
+                        return new ArrayList<>(0);
                     }
 
-                    if (dx != 0 && dz != 0) {
-                        if (!Utils.canWalk(node.x, newY, newZ)
-                                || !Utils.canWalk(newX, newY, node.z))
-                            continue;
-                    }
-
-                    Node newNode = new Node(newX, newY, newZ);
-
-                    neighbors.add(newNode);
+                    if (checkIfValidNeighbor(node, pos, dx != 0 && dz != 0))
+                        neighbors.add(new Node(pos));
                 }
             }
         }
@@ -145,10 +132,19 @@ public class Astar {
         return neighbors;
     }
 
+    private boolean checkIfValidNeighbor(Node node, BlockPos pos, boolean isCorner) {
+        return (!Utils.canWalk(pos) || (isCorner && (!Utils.canWalk(node.x, pos.getY(), pos.getZ())
+                || !Utils.canWalk(pos.getX(), pos.getY(), node.z))));
+
+    }
+
 }
 
 class Node implements Comparable<Node> {
-    int x, y, z, gScore;
+    int x;
+    int y;
+    int z;
+    int gScore;
     double fScore;
     Node previous;
 
@@ -156,6 +152,10 @@ class Node implements Comparable<Node> {
         this.x = x;
         this.y = y;
         this.z = z;
+    }
+
+    public Node(Vec3i pos) {
+        this(pos.getX(), pos.getY(), pos.getZ());
     }
 
     @Override

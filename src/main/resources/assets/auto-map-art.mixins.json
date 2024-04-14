@@ -3,7 +3,8 @@
     "package": "com.automapart.mixins",
     "compatibilityLevel": "JAVA_17",
     "mixins": [
-        "EventManager"
+        "ClientPlayNetworkMixin",
+        "MinecraftClientMixin"
     ],
     "injectors": {
         "defaultRequire": 1

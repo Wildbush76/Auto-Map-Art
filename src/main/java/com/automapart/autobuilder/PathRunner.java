@@ -30,7 +30,7 @@ public class PathRunner {
 
     private BlockPos[] generatePath() {
         BlockPos[] generatedPath = astar.findPath(mc.player.getBlockPos(), goal);
-        if (generatedPath == null) {
+        if (generatedPath.length == 0) {
             active = false;
         }
         current = 0;
