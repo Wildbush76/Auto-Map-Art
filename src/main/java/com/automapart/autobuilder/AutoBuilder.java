@@ -36,12 +36,7 @@ public class AutoBuilder {
 
     private static ModSettings settings = AutoMapArt.getInstance().modSettings;
     private static AutoBuilder instance = new AutoBuilder();
-    private MinecraftClient mc;
     private static final int MAX_BLOCK_PLACE_ATTEMPTS = 10;
-
-    public void initialize(MinecraftClient mc) {
-        this.mc = mc;
-    }
 
     public static AutoBuilder getInstance() {
         if (instance == null) {
@@ -54,15 +49,17 @@ public class AutoBuilder {
         instance = new AutoBuilder();
     }
 
+    private MinecraftClient mc;
+
     private Goal goal;
+
     private SchematicPlacement currentSchematic;
     private stage currentStage;
     private boolean blockPlaced;
-
     private ArrayList<Block> completedBlockTypes = new ArrayList<>();
-    private ArrayList<BlockPos> currentBlocks = new ArrayList<>();
 
-    private Block currentBlockType;
+    private ArrayList<BlockPos> currentBlocks = new ArrayList<>();
+    private Block currentBlockType = null;
 
     private int placeTimer;
 
@@ -74,6 +71,10 @@ public class AutoBuilder {
 
     private AutoBuilder() {
 
+    }
+
+    public void initialize(MinecraftClient mc) {
+        this.mc = mc;
     }
 
     public void onTick() {
@@ -132,6 +133,7 @@ public class AutoBuilder {
     }
 
     public void enable() {
+        Utils.info("Attempting to start");
         enabled = true;
         paused = false;
 
@@ -150,11 +152,13 @@ public class AutoBuilder {
             disable();
             return;
         }
+        Utils.info(String.format("Detected : %s", closestPlacement.getName()));
 
         currentSchematic = closestPlacement;
         getNextBlocks();
         currentStage = stage.BUILDING; // good as we dont need to dump waste of course
         blockPlaced = false;
+        Utils.info("Successfully started");
     }
 
     public void skipCurrentBlock() {
@@ -383,8 +387,8 @@ public class AutoBuilder {
         LitematicaSchematic schematic = currentSchematic.getSchematic();
         Map<String, BlockPos> regionPositions = schematic.getAreaPositions();
         for (Map.Entry<String, BlockPos> regionName : regionPositions.entrySet()) {
+            Utils.info("adding blocks from a region");
             addBlocksFromRegion(regionName, schematic);
-
         }
         return currentBlockType == null;
     }
@@ -398,12 +402,16 @@ public class AutoBuilder {
         Vec3i size = blockStateContainer.getSize();
         boolean forward = false;
         for (int y = 0; y < size.getY(); y++) {
+            Utils.info("going through y stuff");
             for (int roughX = 0; roughX < size.getX(); roughX += settings.getInteractRange() * 2) {
+                Utils.info(String.format("going through the rough x %d", roughX));
                 forward = !forward;
                 for (int z = 0; z < size.getZ(); z++) {
+                    // Utils.info("going through the z");
                     int realZ = (forward) ? z : size.getZ() - 1 - z;
                     int end = (int) Math.min(roughX + settings.getInteractRange() * 2, size.getX());
                     for (int x = roughX; x < end; x++) {
+                        // Utils.info("going through the x");
                         checkAndAddBlock(blockStateContainer.get(x, y, realZ), new BlockPos(x, y, realZ).add(
                                 regionName.getValue()));
                     }

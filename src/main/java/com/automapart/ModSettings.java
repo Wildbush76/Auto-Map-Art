@@ -20,7 +20,7 @@ public class ModSettings {
     public static final File FOLDER = FabricLoader.getInstance().getGameDir().resolve(AutoMapArt.MOD_ID).toFile();
     private File file;
     private Map<Item, BlockPos> resourcePositions;
-    private double interactRange;
+    private int interactRange;
     private int placeDelay;
     private int grabItemDelay;
     private BlockPos wasteLocation;
@@ -50,10 +50,13 @@ public class ModSettings {
         }
 
         placeDelay = data.getInt("placeDelay");
-        interactRange = data.getDouble("interactRange");
+        interactRange = data.getInt("interactRange");
         grabItemDelay = data.getInt("grabItemDelay");
         wasteLocation = BlockPos.fromLong(data.getLong("wasteLocation"));
         rotateToPlace = data.getBoolean("rotateToPlace");
+
+        if (interactRange <= 0)
+            interactRange = 1;
         loadBlockPositions(data);
         loadBlackList(data);
         AutoMapArt.LOGGER.info("Successfully loaded settings");
@@ -64,7 +67,7 @@ public class ModSettings {
         NbtCompound data = new NbtCompound();
         data.putInt("placeDelay", placeDelay);
         data.putInt("grabItemDelay", grabItemDelay);
-        data.putDouble("interactRange", interactRange);
+        data.putInt("interactRange", interactRange);
         data.putLong("wasteLocation", wasteLocation.asLong());
         data.putBoolean("rotateToPlace", rotateToPlace);
 

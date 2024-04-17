@@ -1,5 +1,7 @@
 package com.automapart.autobuilder.utils;
 
+import com.automapart.AutoMapArt;
+
 import net.minecraft.block.*;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -7,7 +9,10 @@ import net.minecraft.block.ShapeContext;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.entity.ai.pathing.NavigationType;
+import net.minecraft.text.MutableText;
+import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
+import net.minecraft.util.Formatting;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
@@ -40,11 +45,11 @@ public class Utils {
     }
 
     public static void error(String message) {
-        // make it send a chat error
+        sendMessage(message, Formatting.RED);
     }
 
     public static void info(String message) {
-        // make it send an info
+        sendMessage(message, Formatting.AQUA);
     }
 
     public static void lookTowardBlock(BlockPos pos) {
@@ -98,6 +103,16 @@ public class Utils {
 
     public static boolean canUpdate() {
         return mc != null && mc.world != null && mc.player != null;
+    }
+
+    public static void sendMessage(String text, Formatting format) {
+        MutableText message = Text.empty();
+        message.append("(Auto Map Art)");
+        message.append(text);
+        message.formatted(format);
+        AutoMapArt.LOGGER.info(message.getString());
+
+        mc.inGameHud.getChatHud().addMessage(message);
     }
 
     public static boolean placeBlock(BlockPos blockPos, boolean rotate, Block block) {
