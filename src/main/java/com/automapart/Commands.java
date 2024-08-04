@@ -5,8 +5,6 @@ import static net.minecraft.server.command.CommandManager.literal;
 
 import java.util.Map;
 
-import com.automapart.autobuilder.AutoBuilder;
-
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.minecraft.command.argument.BlockPosArgumentType;
 import net.minecraft.command.argument.BlockStateArgument;
@@ -18,7 +16,7 @@ import net.minecraft.util.math.BlockPos;
 public class Commands {
         public static void registerCommands(ModSettings settings) {
                 testCommand(settings);
-                setResouceLocation(settings);
+                setResourceLocation(settings);
                 enable();
         }
 
@@ -41,7 +39,7 @@ public class Commands {
                                                 })));
         }
 
-        private static void setResouceLocation(ModSettings settings) {
+        private static void setResourceLocation(ModSettings settings) {
                 CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess,
                                 environment) -> dispatcher.register(literal("setResourceLocation")
                                                 .requires(source -> source.isExecutedByPlayer())
@@ -76,7 +74,7 @@ public class Commands {
                                                 .requires(source -> source.isExecutedByPlayer())
                                                 .executes(context -> {
                                                         AutoMapArt.LOGGER.info("Trying to start");
-                                                        AutoBuilder.getInstance().enable();
+
                                                         return 1;
                                                 })));
         }

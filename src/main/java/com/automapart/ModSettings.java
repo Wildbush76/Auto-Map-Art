@@ -68,7 +68,9 @@ public class ModSettings {
         data.putInt("placeDelay", placeDelay);
         data.putInt("grabItemDelay", grabItemDelay);
         data.putInt("interactRange", interactRange);
-        data.putLong("wasteLocation", wasteLocation.asLong());
+        if (wasteLocation != null) {
+            data.putLong("wasteLocation", wasteLocation.asLong());
+        }
         data.putBoolean("rotateToPlace", rotateToPlace);
 
         saveBlockPositions(data);
@@ -124,6 +126,10 @@ public class ModSettings {
         interactRange = range;
     }
 
+    public void setWasteLocation(BlockPos location) {
+        wasteLocation = location;
+    }
+
     public List<Block> getBlackList() {
         return blackList;
     }
@@ -159,7 +165,6 @@ public class ModSettings {
             blockPositions[i] = entry.getValue().asLong();
             i++;
         }
-
         data.putLongArray("blockPositions", blockPositions);
         data.putIntArray("itemIds", itemIds);
 
@@ -175,6 +180,7 @@ public class ModSettings {
 
     private void setDefaultSettings() {
         AutoMapArt.LOGGER.info("Loading default settings");
+        wasteLocation = null;
         placeDelay = 3;
         interactRange = 5;
         grabItemDelay = 1;

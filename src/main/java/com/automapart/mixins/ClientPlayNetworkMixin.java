@@ -5,7 +5,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import com.automapart.autobuilder.AutoBuilder;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.network.packet.s2c.play.InventoryS2CPacket;
 
@@ -13,6 +12,6 @@ import net.minecraft.network.packet.s2c.play.InventoryS2CPacket;
 public class ClientPlayNetworkMixin {
     @Inject(at = @At("TAIL"), method = "onInventory")
     private void onInventory(InventoryS2CPacket packet, CallbackInfo info) {
-        AutoBuilder.getInstance().onInventory(packet);
+        // AutoBuilder.getInstance().onInventory(packet);
     }
 }
