@@ -2,10 +2,11 @@ package com.automapart;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.block.Block;
@@ -19,47 +20,18 @@ public class ModSettings {
 
     public static final File FOLDER = FabricLoader.getInstance().getGameDir().resolve(AutoMapArt.MOD_ID).toFile();
     private File file;
+    // Settings
     private Map<Item, BlockPos> resourcePositions;
     private int interactRange;
     private int placeDelay;
     private int grabItemDelay;
     private BlockPos wasteLocation;
-    private ArrayList<Block> blackList;
     private boolean rotateToPlace;
+    private Set<Block> blackList;
 
     public ModSettings() {
         file = new File(FOLDER, AutoMapArt.MOD_ID + ".nbt");
-    }
-
-    public void load() {
-        if (file == null || !file.exists()) {
-            setDefaultSettings();
-            return;
-        }
-        NbtCompound data;
-        try {
-            data = NbtIo.read(file);
-        } catch (IOException ioException) {
-            AutoMapArt.LOGGER.error(ioException.getMessage());
-            setDefaultSettings();
-            return;
-        } catch (CrashException crashException) {
-            AutoMapArt.LOGGER.error("issues occured");
-            setDefaultSettings();
-            return;
-        }
-
-        placeDelay = data.getInt("placeDelay");
-        interactRange = data.getInt("interactRange");
-        grabItemDelay = data.getInt("grabItemDelay");
-        wasteLocation = BlockPos.fromLong(data.getLong("wasteLocation"));
-        rotateToPlace = data.getBoolean("rotateToPlace");
-
-        if (interactRange <= 0)
-            interactRange = 1;
-        loadBlockPositions(data);
-        loadBlackList(data);
-        AutoMapArt.LOGGER.info("Successfully loaded settings");
+        load();
     }
 
     public void save() {
@@ -115,22 +87,22 @@ public class ModSettings {
     }
 
     public void setPlaceDelay(int delay) {
-        placeDelay = delay;
+        placeDelay = Math.max(delay, 0);
     }
 
     public void setGrabItemDelay(int delay) {
-        grabItemDelay = delay;
+        grabItemDelay = Math.max(delay, 0);
     }
 
     public void setInteractRange(int range) {
-        interactRange = range;
+        interactRange = Math.max(range, 0);
     }
 
     public void setWasteLocation(BlockPos location) {
         wasteLocation = location;
     }
 
-    public List<Block> getBlackList() {
+    public Set<Block> getBlackList() {
         return blackList;
     }
 
@@ -138,9 +110,37 @@ public class ModSettings {
         return wasteLocation;
     }
 
+    private void load() {
+        if (file == null || !file.exists()) {
+            setDefaultSettings();
+            return;
+        }
+        NbtCompound data;
+        try {
+            data = NbtIo.read(file);
+        } catch (IOException ioException) {
+            AutoMapArt.LOGGER.error(ioException.getMessage());
+            setDefaultSettings();
+            return;
+        } catch (CrashException crashException) {
+            AutoMapArt.LOGGER.error("issues occured");
+            setDefaultSettings();
+            return;
+        }
+
+        placeDelay = data.getInt("placeDelay");
+        interactRange = data.getInt("interactRange");
+        grabItemDelay = data.getInt("grabItemDelay");
+        wasteLocation = BlockPos.fromLong(data.getLong("wasteLocation"));
+        rotateToPlace = data.getBoolean("rotateToPlace");
+        loadBlockPositions(data);
+        loadBlackList(data);
+        AutoMapArt.LOGGER.info("Successfully loaded settings");
+    }
+
     private void loadBlackList(NbtCompound data) {
         int[] blockIds = data.getIntArray("blackList");
-        blackList = new ArrayList<>(blockIds.length);
+        blackList = new HashSet<>();
         for (int id : blockIds) {
             blackList.add(Block.getBlockFromItem(Item.byRawId(id)));
         }
@@ -172,8 +172,10 @@ public class ModSettings {
 
     private void saveBlackList(NbtCompound data) {
         int[] blackListIds = new int[blackList.size()];
+        Iterator<Block> iterator = blackList.iterator();
+
         for (int i = 0; i < blackListIds.length; i++) {
-            blackListIds[i] = Item.getRawId(blackList.get(i).asItem());
+            blackListIds[i] = Item.getRawId(iterator.next().asItem());
         }
         data.putIntArray("blackList", blackListIds);
     }
@@ -185,7 +187,7 @@ public class ModSettings {
         interactRange = 5;
         grabItemDelay = 1;
         resourcePositions = new HashMap<>();
-        blackList = new ArrayList<>();
+        blackList = new HashSet<>();
         rotateToPlace = true;
     }
 }
