@@ -12,7 +12,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.ArrayList;
-import com.automapart.AutoMapArt;
+import com.automapart.AutoMapArtManager;
 
 public class SchematicManager {
     private SchematicPlacement currentSchematic;
@@ -45,7 +45,7 @@ public class SchematicManager {
         Vec3i size = blockStateContainer.getSize();
         boolean forward = false;
 
-        double roughXStep = (int) (AutoMapArt.getInstance().modSettings.getInteractRange() * 2);
+        double roughXStep = (int) (AutoMapArtManager.getInstance().getModSettings().getInteractRange() * 2);
 
         for (int y = 0; y < size.getY(); y++) {
             for (int roughX = 0; roughX < size.getX(); roughX += roughXStep) {
@@ -67,7 +67,7 @@ public class SchematicManager {
     private void checkAndAddBlock(Map<Block, ArrayList<BlockPos>> locations, BlockState blockState, BlockPos blockPos) {
         Block block = blockState.getBlock();
 
-        if (blockState.isAir() || AutoMapArt.getInstance().modSettings.getBlackList().contains(block)) {
+        if (blockState.isAir() || AutoMapArtManager.getInstance().getModSettings().getBlackList().contains(block)) {
             return;
         }
 
