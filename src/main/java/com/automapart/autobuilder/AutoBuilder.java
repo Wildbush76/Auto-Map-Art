@@ -51,7 +51,7 @@ public class AutoBuilder {
     }
 
     public void build() {
-
+        // add logic for building here
     }
 
     public void onInventory(InventoryS2CPacket packet) {

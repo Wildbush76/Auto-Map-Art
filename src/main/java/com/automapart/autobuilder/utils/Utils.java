@@ -58,9 +58,9 @@ public class Utils {
 
     public static void lookTowardBlock(BlockPos pos, boolean pitch) {
         if (pitch) {
-            mc.player.setPitch((float) getPitch(pos));
+            mc.player.setPitch((float) getPitchToPosition(pos));
         }
-        float yaw = (float) getYaw(pos);
+        float yaw = (float) getYawToPosition(pos);
 
         mc.player.setYaw(yaw);
     }
@@ -73,16 +73,20 @@ public class Utils {
         return Math.pow(mc.player.getX() - pos.getX(), 2) + Math.pow(mc.player.getY() - pos.getY(), 2);
     }
 
-    public static double getPitch(Vec3i pos) {
+    public static double getPitchToPosition(Vec3i pos) {
         return Math.atan2(pos.getZ() - mc.player.getZ(), getFlatDistance(pos));
     }
 
-    public static double getYaw(Vec3i pos) {
+    public static double getYawToPosition(Vec3i pos) {
         return Math.atan2(pos.getY() - mc.player.getY(), pos.getX() - mc.player.getX());
     }
 
     public static boolean canWalk(int x, int y, int z) {
         return canWalk(new BlockPos(x, y, z));
+    }
+
+    public static boolean canWalk(Vec3i pos) {
+        return canWalk(new BlockPos(pos));
     }
 
     public static boolean canWalk(BlockPos blockPos) {
