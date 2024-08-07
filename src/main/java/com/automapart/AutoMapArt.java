@@ -6,9 +6,6 @@ import net.fabricmc.api.ModInitializer;
 
 public class AutoMapArt implements ModInitializer {
 
-	private AutoMapArt() {
-	}
-
 	public static final String MOD_ID = "auto-map-art";
 	public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 

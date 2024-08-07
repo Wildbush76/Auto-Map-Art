@@ -17,6 +17,5 @@ public class MinecraftClientMixin {
     @Inject(at = @At("TAIL"), method = "tick")
     private void onTick(CallbackInfo info) {
         autobuilder.onTick();
-        autobuilder.onPostTick();
     }
 }

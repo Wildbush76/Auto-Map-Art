@@ -1,4 +1,4 @@
-package com.automapart.autobuilder;
+package com.automapart.autobuilder.pathing;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -29,13 +29,14 @@ public class Astar {
      * @param path  the list that will be used for the path
      * @return
      */
-    public static BlockPos[] findPath(BlockPos start, BlockPos goal, MinecraftClient mc) {
+    public static PathResult findPath(BlockPos start, BlockPos goal, MinecraftClient mc, List<BlockPos> path) {
         Set<Node> openSet = new HashSet<>();
         Set<Node> closedSet = new HashSet<>();
         Node startNode = new Node(start);
         Node endNode = new Node(goal);
         if (start.equals(goal)) {
-            return reconstructPath(startNode);
+            reconstructPath(startNode, path);
+            return PathResult.FULL_PATH;
         }
         openSet.add(startNode);
 
@@ -49,7 +50,7 @@ public class Astar {
 
             if (checkTime == 0) {
                 if (System.currentTimeMillis() - startTime >= TIMEOUT) {
-                    return null;
+                    return PathResult.TIMEOUT;
                 }
                 checkTime = 1000;
             } else {
@@ -61,18 +62,19 @@ public class Astar {
             closedSet.add(current);
 
             List<Node> neighbors = getValidNeighbors(mc, current);
-
-            if (current.gScore >= MAX_LENGTH || neighbors.isEmpty() || current.equals(endNode)) {
+            boolean isMaxLength = current.gScore >= MAX_LENGTH;
+            if (isMaxLength || neighbors.isEmpty() || current.equals(endNode)) {
                 long totalTime = System.currentTimeMillis() - startTime;
                 AutoMapArt.LOGGER
                         .debug("Movements considered {} Time Taken {}", movementsConsidered, totalTime);
-                return reconstructPath(current);
+                reconstructPath(current, path);
+                return (isMaxLength) ? PathResult.PARTIAL_PATH : PathResult.FULL_PATH;
             }
             addNeighbors(current, endNode, neighbors, openSet, closedSet);
 
         }
 
-        return new BlockPos[0];
+        return PathResult.FAILED;
     }
 
     private static void addNeighbors(Node current, Node endNode, List<Node> neighbors, Set<Node> openSet,
@@ -96,16 +98,14 @@ public class Astar {
         }
     }
 
-    private static BlockPos[] reconstructPath(Node node) {
-        ArrayList<BlockPos> blockPositions = new ArrayList<>();
+    private static void reconstructPath(Node node, List<BlockPos> path) {
         Node currentNode = node;
         while (currentNode != null) {
-            blockPositions.add(new BlockPos(currentNode.pos));
+            path.add(new BlockPos(currentNode.pos));
             currentNode = currentNode.previous;
         }
-        Collections.reverse(blockPositions);
-        BlockPos[] outputPath = new BlockPos[blockPositions.size()];
-        return blockPositions.toArray(outputPath);
+        Collections.reverse(path);
+
     }
 
     private static double heuristic(Node one, Node two) {
@@ -173,11 +173,5 @@ class Node implements Comparable<Node> {
     @Override
     public int hashCode() {
         return pos.hashCode();
-    }
-}
-
-class OutOfTimeException extends Exception {
-    public OutOfTimeException(String errorMessage) {
-        super(errorMessage);
     }
 }

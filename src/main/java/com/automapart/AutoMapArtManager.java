@@ -28,8 +28,6 @@ public class AutoMapArtManager {
     private AutoBuilder autoBuilder;
 
     public void initialize() {
-        Utils.initialize(mc);
-        ItemUtils.initialize(mc);
         Commands.registerCommands(settings);
     }
 
@@ -40,4 +38,5 @@ public class AutoMapArtManager {
     public AutoBuilder getAutoBuilder() {
         return autoBuilder;
     }
+
 }

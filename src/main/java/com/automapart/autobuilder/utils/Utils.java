@@ -22,11 +22,8 @@ import net.minecraft.util.math.Vec3i;
 import net.minecraft.world.World;
 
 public class Utils {
-    public static void initialize(MinecraftClient mc) {
-        Utils.mc = mc;
-    }
 
-    private static MinecraftClient mc;
+    private static MinecraftClient mc = MinecraftClient.getInstance();
 
     public static void turnOffKeys() {
         setPressed(mc.options.forwardKey, false);
@@ -38,10 +35,6 @@ public class Utils {
                 getFlatDistanceSquared(pos) +
                         Math.pow(mc.player.getZ() - pos.getZ(), 2));
 
-    }
-
-    public static void debug(String message) {
-        info(message);
     }
 
     public static void error(String message) {
@@ -58,9 +51,9 @@ public class Utils {
 
     public static void lookTowardBlock(BlockPos pos, boolean pitch) {
         if (pitch) {
-            mc.player.setPitch((float) getPitchToPosition(pos));
+            mc.player.setPitch(getPitchToPosition(pos));
         }
-        float yaw = (float) getYawToPosition(pos);
+        float yaw = getYawToPosition(pos);
 
         mc.player.setYaw(yaw);
     }
@@ -73,12 +66,12 @@ public class Utils {
         return Math.pow(mc.player.getX() - pos.getX(), 2) + Math.pow(mc.player.getY() - pos.getY(), 2);
     }
 
-    public static double getPitchToPosition(Vec3i pos) {
-        return Math.atan2(pos.getZ() - mc.player.getZ(), getFlatDistance(pos));
+    public static float getPitchToPosition(Vec3i pos) {
+        return (float) Math.atan2(pos.getZ() - mc.player.getZ(), getFlatDistance(pos));
     }
 
-    public static double getYawToPosition(Vec3i pos) {
-        return Math.atan2(pos.getY() - mc.player.getY(), pos.getX() - mc.player.getX());
+    public static float getYawToPosition(Vec3i pos) {
+        return (float) Math.atan2(pos.getY() - mc.player.getY(), pos.getX() - mc.player.getX());
     }
 
     public static boolean canWalk(int x, int y, int z) {

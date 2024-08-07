@@ -74,7 +74,7 @@ public class Commands {
                                                 .requires(source -> source.isExecutedByPlayer())
                                                 .executes(context -> {
                                                         AutoMapArt.LOGGER.info("Trying to start");
-
+                                                        AutoMapArtManager.getInstance().getAutoBuilder().start();
                                                         return 1;
                                                 })));
         }
