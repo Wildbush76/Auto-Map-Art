@@ -433,7 +433,6 @@ public class AutoMapArt extends Module {
          * @return returns true if more block positions are set
          */
         private boolean GetNextBlocks() { // gets the next block type once done with the current one
-
                 if (currentBlockType != null) {
                         debug("Completed " + currentBlockType.asItem().getName().getString());
                         completedBlockTypes.add(currentBlockType);
@@ -610,8 +609,13 @@ public class AutoMapArt extends Module {
          */
 
         private void SetDumpWasteGoal() { // its not a landfill but yknow
-                goal = new Goal(wasteLocation.get());
-                currentStage = stage.DUMPING_WASTE;
+                if (wasteLocation.get() != null) {
+                        goal = new Goal(wasteLocation.get());
+                        currentStage = stage.DUMPING_WASTE;
+                } else {
+                        warning("No waste location set");
+                        currentBlockType = null;
+                }
         }
 
         /**
